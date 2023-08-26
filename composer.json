@@ -16,7 +16,7 @@
     "require": {
         "php": "^8.2",
         "duyler/dependency-injection": "dev-main",
-        "duyler/event-bus": "*",
+        "duyler/event-bus": "*"
     },
     "require-dev": {
         "phpunit/phpunit": "^10.0"

@@ -22,7 +22,7 @@
         "duyler/twig-wrapper": "*",
         "httpsoft/http-server-request": "^1.1",
         "httpsoft/http-response": "^1.1",
-        "httpsoft/http-emitter": "^1.1",
+        "httpsoft/http-emitter": "^1.1"
     },
     "require-dev": {
         "phpunit/phpunit": "^10.0"

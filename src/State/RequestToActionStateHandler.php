@@ -2,17 +2,22 @@
 
 declare(strict_types=1);
 
-namespace Duyler\EventBusScenario;
+namespace Duyler\EventBusScenario\State;
 
 use Duyler\Config\Config;
 use Duyler\EventBus\Contract\State\StateMainAfterHandlerInterface;
 use Duyler\EventBus\State\Service\StateMainAfterService;
+use Duyler\EventBusScenario\Context;
+use Duyler\EventBusScenario\ScenarioParser;
 use Psr\Http\Message\ServerRequestInterface;
 
-readonly class RequestDoActionStateHandler implements StateMainAfterHandlerInterface
+readonly class RequestToActionStateHandler implements StateMainAfterHandlerInterface
 {
-    public function __construct(private Config $config, private ScenarioParser $scenarioParser)
-    {
+    public function __construct(
+        private Config $config,
+        private ScenarioParser $scenarioParser,
+        private Context $context,
+    ) {
     }
 
     public function handle(StateMainAfterService $stateService): void
@@ -25,7 +30,7 @@ readonly class RequestDoActionStateHandler implements StateMainAfterHandlerInter
             return;
         }
 
-        $resource = strtolower(str_replace('.', '/', $request->getAttribute('scenario')));
+        $resource = str_replace('.', '/', $request->getAttribute('scenario'));
 
         $resource = strtolower(preg_replace(
             '/(?<=\d)(?=[A-Za-z])|(?<=[A-Za-z])(?=\d)|(?<=[a-z])(?=[A-Z])/',
@@ -43,6 +48,8 @@ readonly class RequestDoActionStateHandler implements StateMainAfterHandlerInter
             foreach ($scenario->actions as $action) {
                 $stateService->doExistsAction($action->id);
             }
+
+            $this->context->write($scenario);
         }
     }
 

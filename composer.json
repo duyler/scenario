@@ -20,6 +20,7 @@
         "duyler/dependency-injection": "dev-main",
         "duyler/event-bus": "*",
         "duyler/twig-wrapper": "*",
+        "duyler/router": "dev-main",
         "httpsoft/http-server-request": "^1.1",
         "httpsoft/http-response": "^1.1",
         "httpsoft/http-emitter": "^1.1"

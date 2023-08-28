@@ -9,7 +9,9 @@ use Duyler\EventBus\State\Service\StateMainFinalService;
 use Duyler\EventBusScenario\Context;
 use Duyler\TwigWrapper\TwigWrapper;
 use HttpSoft\Emitter\SapiEmitter;
+use HttpSoft\Response\EmptyResponse;
 use HttpSoft\Response\HtmlResponse;
+use HttpSoft\Response\ResponseStatusCodeInterface;
 use Twig\Error\LoaderError;
 use Twig\Error\RuntimeError;
 use Twig\Error\SyntaxError;
@@ -33,15 +35,29 @@ readonly class ResultEmitterStateHandler implements StateMainFinalHandlerInterfa
      */
     public function handle(StateMainFinalService $stateService): void
     {
+        if ($this->context->isEmpty()) {
+            $response = new EmptyResponse(ResponseStatusCodeInterface::STATUS_NOT_FOUND);
+            $emitter = new SapiEmitter();
+            $emitter->emit($response);
+            return;
+        }
+
         $scenario = $this->context->read();
 
         $result = [];
 
         foreach ($scenario->actions as $action) {
-            $result[str_replace('.', '_', $action->id)] = $stateService->getResult($action->id)->data;
+            $segments = explode('.', $action->id);
+            $domain = $segments[0];
+            $propertyName = $segments[1];
+            $result[$domain][$propertyName] = $stateService->getResult($action->id)->data;
         }
 
-        $content = $this->twigWrapper->content($result)->render($scenario->id);
+        if ($this->twigWrapper->exists($scenario->id) === false) {
+            return;
+        }
+
+        $content = $this->twigWrapper->content($result)->render(str_replace('.', '_', $scenario->id));
 
         $response = new HtmlResponse($content);
         $emitter = new SapiEmitter();

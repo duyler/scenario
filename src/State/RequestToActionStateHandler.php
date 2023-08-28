@@ -30,6 +30,10 @@ readonly class RequestToActionStateHandler implements StateMainAfterHandlerInter
             return;
         }
 
+        if (empty($request->getAttribute('scenario'))) {
+            return;
+        }
+
         $resource = str_replace('.', '/', $request->getAttribute('scenario'));
 
         $resource = strtolower(preg_replace(

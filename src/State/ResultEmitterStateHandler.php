@@ -53,11 +53,13 @@ readonly class ResultEmitterStateHandler implements StateMainFinalHandlerInterfa
             $result[$domain][$propertyName] = $stateService->getResult($action->id)->data;
         }
 
-        if ($this->twigWrapper->exists($scenario->id) === false) {
+        $template = str_replace('.', DIRECTORY_SEPARATOR, $scenario->id);
+
+        if ($this->twigWrapper->exists($template) === false) {
             return;
         }
 
-        $content = $this->twigWrapper->content($result)->render(str_replace('.', '_', $scenario->id));
+        $content = $this->twigWrapper->content($result)->render($template);
 
         $response = new HtmlResponse($content);
         $emitter = new SapiEmitter();

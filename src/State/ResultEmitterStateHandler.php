@@ -6,11 +6,13 @@ namespace Duyler\EventBusScenario\State;
 
 use Duyler\EventBus\Contract\State\StateMainFinalHandlerInterface;
 use Duyler\EventBus\State\Service\StateMainFinalService;
+use Duyler\EventBusScenario\ActionData;
 use Duyler\EventBusScenario\Context;
-use Duyler\TwigWrapper\TwigWrapper;
+use Duyler\EventBusScenario\Enum\HandlerType;
+use Duyler\EventBusScenario\ScenarioHandlerMatcher;
+use Duyler\EventBusScenario\ScenarioRespondData;
 use HttpSoft\Emitter\SapiEmitter;
 use HttpSoft\Response\EmptyResponse;
-use HttpSoft\Response\HtmlResponse;
 use HttpSoft\Response\ResponseStatusCodeInterface;
 use Twig\Error\LoaderError;
 use Twig\Error\RuntimeError;
@@ -20,7 +22,7 @@ readonly class ResultEmitterStateHandler implements StateMainFinalHandlerInterfa
 {
     public function __construct(
         private Context $context,
-        private TwigWrapper $twigWrapper,
+        private ScenarioHandlerMatcher $handlerMatcher,
     ) {
     }
 
@@ -44,24 +46,26 @@ readonly class ResultEmitterStateHandler implements StateMainFinalHandlerInterfa
 
         $scenario = $this->context->read();
 
-        $result = [];
+        $actionDataList = [];
 
         foreach ($scenario->actions as $action) {
-            $segments = explode('.', $action->id);
-            $domain = $segments[0];
-            $propertyName = $segments[1];
-            $result[$domain][$propertyName] = $stateService->getResult($action->id)->data;
+            $actionResult = $stateService->getResult($action->id);
+            if ($actionResult->data !== null) {
+                $actionDataList[] = new ActionData(
+                    $action->id,
+                    $actionResult->data
+                );
+            }
         }
 
-        $template = str_replace('.', DIRECTORY_SEPARATOR, $scenario->id);
+        $scenarioRespondData = new ScenarioRespondData(
+            $scenario->id,
+            $actionDataList
+        );
 
-        if ($this->twigWrapper->exists($template) === false) {
-            return;
-        }
+        $handler = $this->handlerMatcher->match(HandlerType::from($scenario->handler));
+        $response = $handler->handle($scenarioRespondData);
 
-        $content = $this->twigWrapper->content($result)->render($template);
-
-        $response = new HtmlResponse($content);
         $emitter = new SapiEmitter();
         $emitter->emit($response);
     }

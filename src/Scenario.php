@@ -12,6 +12,7 @@ class Scenario
         public array $authors,
         /** @var ScenarioAction[] $actions */
         public array $actions,
+        public string $handler,
     ) {
     }
 
@@ -28,6 +29,7 @@ class Scenario
             descriptions: $scenarioData['description'] ?? '',
             authors: $scenarioData['authors'] ?? [],
             actions: $actions,
+            handler: $scenarioData['handler'],
         );
     }
 

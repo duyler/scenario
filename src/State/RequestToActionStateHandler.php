@@ -8,7 +8,9 @@ use Duyler\Config\Config;
 use Duyler\EventBus\Contract\State\StateMainAfterHandlerInterface;
 use Duyler\EventBus\State\Service\StateMainAfterService;
 use Duyler\EventBusScenario\Context;
+use Duyler\EventBusScenario\Scenario;
 use Duyler\EventBusScenario\ScenarioParser;
+use JsonException;
 use Psr\Http\Message\ServerRequestInterface;
 
 readonly class RequestToActionStateHandler implements StateMainAfterHandlerInterface
@@ -20,6 +22,9 @@ readonly class RequestToActionStateHandler implements StateMainAfterHandlerInter
     ) {
     }
 
+    /**
+     * @throws JsonException
+     */
     public function handle(StateMainAfterService $stateService): void
     {
         /** @var ServerRequestInterface $request */
@@ -47,7 +52,11 @@ readonly class RequestToActionStateHandler implements StateMainAfterHandlerInter
             . $resource . '.json';
 
         if (is_file($scenarioResource)) {
-            $scenario = $this->scenarioParser->parse($scenarioResource);
+
+            $scenarioData = $this->scenarioParser->parse($scenarioResource);
+            $scenarioData['handler'] = $request->getAttribute('handler');
+
+            $scenario = Scenario::fromArray($scenarioData);
 
             foreach ($scenario->actions as $action) {
                 $stateService->doExistsAction($action->id);

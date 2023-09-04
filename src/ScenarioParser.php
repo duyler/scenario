@@ -6,13 +6,7 @@ namespace Duyler\EventBusScenario;
 
 class ScenarioParser
 {
-    public function parse(string $scenarioResource): Scenario
-    {
-        $content = $this->load($scenarioResource);
-        return Scenario::fromArray($content);
-    }
-
-    private function load(string $resource): array
+    public function parse(string $resource): array
     {
         $content = [];
 

@@ -46,6 +46,10 @@ readonly class ResultEmitterStateHandler implements StateMainFinalHandlerInterfa
 
         $scenario = $this->context->read();
 
+        if (empty($scenario->handler)) {
+            return;
+        }
+
         $actionDataList = [];
 
         foreach ($scenario->actions as $action) {

@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Duyler\EventBusScenario\Handler;
 
-use Duyler\EventBusScenario\ScenarioRespondData;
+use Duyler\EventBusScenario\Exception\TemplateNotFoundException;
 use Duyler\EventBusScenario\ScenarioHandlerInterface;
-use Duyler\EventBusScenario\TemplateNotFoundException;
+use Duyler\EventBusScenario\ScenarioRespondData;
 use Duyler\TwigWrapper\TwigWrapper;
 use HttpSoft\Response\HtmlResponse;
 use Psr\Http\Message\ResponseInterface;
@@ -40,7 +40,7 @@ readonly class WebScenarioHandler implements ScenarioHandlerInterface
         $template = str_replace('.', DIRECTORY_SEPARATOR, $scenarioRespondData->scenarioId);
 
         if ($this->twigWrapper->exists($template) === false) {
-            throw new TemplateNotFoundException($scenarioRespondData->scenarioId);
+            throw new TemplateNotFoundException($template, $scenarioRespondData->scenarioId);
         }
 
         $content = $this->twigWrapper->content($result)->render($template);

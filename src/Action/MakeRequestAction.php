@@ -4,24 +4,24 @@ declare(strict_types=1);
 
 namespace Duyler\EventBusScenario\Action;
 
-use Duyler\Config\Config;
 use Duyler\EventBus\Dto\Result;
 use Duyler\EventBus\Enum\ResultStatus;
+use Duyler\EventBusScenario\Config\RouterConfig;
 use Duyler\Router\Router;
 use HttpSoft\ServerRequest\ServerRequestCreator;
 
 readonly class MakeRequestAction
 {
-    public function __construct(private Router $router, private Config $config)
+    public function __construct(private Router $router, private RouterConfig $routerConfig)
     {
     }
 
     public function __invoke(): Result
     {
-        $this->router->setRoutesDirPath(
-            $this->config->env(Config::PROJECT_ROOT)
-            . $this->config->get('router', 'routes_dir')
-            . DIRECTORY_SEPARATOR
+        $this->router->setRoutesDirPath($this->routerConfig->routesDirPath);
+
+        $this->router->setLanguages(
+            $this->routerConfig->languages
         );
 
         $result = $this->router->startRouting();

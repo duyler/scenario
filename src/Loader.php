@@ -13,6 +13,7 @@ use Duyler\EventBusScenario\State\ReceiveScenarioStateHandler;
 use Duyler\EventBusScenario\State\RequestToActionStateHandler;
 use Duyler\EventBusScenario\State\ResultEmitterStateHandler;
 use Duyler\Router\Request;
+use HttpSoft\Message\ServerRequest;
 use Psr\Http\Message\ServerRequestInterface;
 
 class Loader implements PackageLoaderInterface
@@ -22,6 +23,9 @@ class Loader implements PackageLoaderInterface
         $makeRequestAction = new Action(
             id: 'Request.MakeRequest',
             handler: MakeRequestAction::class,
+            classMap: [
+                ServerRequestInterface::class => ServerRequest::class
+            ],
             providers: [
                 Request::class => RouterRequestProvider::class,
             ],

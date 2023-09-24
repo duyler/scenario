@@ -12,7 +12,7 @@ use Duyler\EventBusScenario\Provider\RouterRequestProvider;
 use Duyler\EventBusScenario\State\ReceiveScenarioStateHandler;
 use Duyler\EventBusScenario\State\RequestToActionStateHandler;
 use Duyler\EventBusScenario\State\ResultEmitterStateHandler;
-use Duyler\Router\Request;
+use Duyler\Router\Router;
 use HttpSoft\Message\ServerRequest;
 use Psr\Http\Message\ServerRequestInterface;
 
@@ -27,7 +27,7 @@ class Loader implements PackageLoaderInterface
                 ServerRequestInterface::class => ServerRequest::class
             ],
             providers: [
-                Request::class => RouterRequestProvider::class,
+                Router::class => RouterRequestProvider::class,
             ],
             externalAccess: true,
             contract: ServerRequestInterface::class,
@@ -36,6 +36,7 @@ class Loader implements PackageLoaderInterface
         $requestToAction = $loaderService->getContainer()->make(RequestToActionStateHandler::class);
         $receiveScenario = $loaderService->getContainer()->make(ReceiveScenarioStateHandler::class);
         $resultEmitter = $loaderService->getContainer()->make(ResultEmitterStateHandler::class);
+
         $loaderService->getBuilder()->addStateHandler($resultEmitter);
         $loaderService->getBuilder()->addStateHandler($receiveScenario);
         $loaderService->getBuilder()->addStateHandler($requestToAction);

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Duyler\EventBusScenario\Provider;
 
 use Duyler\DependencyInjection\Provider\AbstractProvider;
+use Duyler\Router\RouterConfig;
 use HttpSoft\ServerRequest\ServerRequestCreator;
 use Psr\Http\Message\ServerRequestInterface;
 
@@ -12,18 +13,15 @@ class RouterRequestProvider extends AbstractProvider
 {
     private ServerRequestInterface $request;
 
-    public function __construct()
+    public function __construct(private readonly RouterConfig $routerConfig)
     {
-        $this->request = ServerRequestCreator::create();
     }
 
     public function getParams(): array
     {
         return [
-            'uri' => $this->request->getUri()->getPath(),
-            'method' => $this->request->getMethod(),
-            'host' => $this->request->getUri()->getHost(),
-            'protocol' => $this->request->getUri()->getScheme(),
+            'serverRequest' => ServerRequestCreator::create(),
+            'routerConfig' => $this->routerConfig,
         ];
     }
 }

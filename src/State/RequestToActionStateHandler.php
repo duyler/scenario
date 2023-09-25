@@ -43,7 +43,8 @@ readonly class RequestToActionStateHandler implements StateMainAfterHandlerInter
 
         $resource = strtolower(preg_replace(
             '/(?<=\d)(?=[A-Za-z])|(?<=[A-Za-z])(?=\d)|(?<=[a-z])(?=[A-Z])/',
-            '_', $resource
+            '_',
+            $resource
         ));
 
         $scenarioResource = $this->config->env(Config::PROJECT_ROOT)

@@ -14,29 +14,24 @@
         "docs": "https://duyler.org/docs/event-bus-scenario/"
     },
     "require": {
-        "php": "^8.2",
-        "duyler/config": "dev-main",
-        "duyler/contract": "dev-main",
-        "duyler/dependency-injection": "dev-main",
-        "duyler/event-bus": "*",
-        "duyler/twig-wrapper": "*",
-        "duyler/router": "dev-main",
-        "httpsoft/http-server-request": "^1.1",
-        "httpsoft/http-response": "^1.1",
-        "httpsoft/http-emitter": "^1.1"
+        "php": "^8.4",
+        "duyler/builder": "dev-main",
+        "symfony/yaml": "^7.3"
     },
     "require-dev": {
-        "phpunit/phpunit": "^10.0"
+        "phpunit/phpunit": "^10.0",
+        "friendsofphp/php-cs-fixer": "^3.77"
     },
     "minimum-stability": "dev",
+    "prefer-stable": true,
     "autoload": {
         "psr-4": {
-            "Duyler\\EventBusScenario\\": "src/"
+            "Duyler\\Scenario\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "Duyler\\EventBusScenario\\Test\\": ["tests/"]
+            "Duyler\\Scenario\\Test\\": ["tests/"]
         }
     }
 }

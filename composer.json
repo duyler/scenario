@@ -1,5 +1,5 @@
 {
-    "name": "duyler/event-bus-scenario",
+    "name": "duyler/scenario",
     "type": "library",
     "description": "Duyler event bus scenario handler",
     "license": "MIT",

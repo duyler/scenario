@@ -7,6 +7,6 @@ namespace Duyler\Scenario;
 readonly class ScenarioConfig
 {
     public function __construct(
-        public string $path,
+        public string $path = 'scenarios',
     ) {}
 }

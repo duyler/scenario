@@ -36,6 +36,12 @@ class ResolveCommandStateHandler implements MainAfterStateHandlerInterface
     #[Override]
     public function observed(StateContext $context): array
     {
+        $scenarios = $this->scenarioStorage->getAllByAction();
+
+        if (0 === count($scenarios)) {
+            return [microtime()];
+        }
+
         return array_keys($this->scenarioStorage->getAllByAction());
     }
 }

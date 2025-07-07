@@ -2,44 +2,74 @@
 
 declare(strict_types=1);
 
-namespace Duyler\EventBusScenario;
+namespace Duyler\Scenario;
 
-use Duyler\Contract\PackageLoader\LoaderServiceInterface;
-use Duyler\Contract\PackageLoader\PackageLoaderInterface;
-use Duyler\EventBus\Dto\Action;
-use Duyler\EventBusScenario\Action\MakeRequestAction;
-use Duyler\EventBusScenario\Provider\RouterRequestProvider;
-use Duyler\EventBusScenario\State\ReceiveScenarioStateHandler;
-use Duyler\EventBusScenario\State\RequestToActionStateHandler;
-use Duyler\EventBusScenario\State\ResultEmitterStateHandler;
-use Duyler\Router\Router;
-use HttpSoft\Message\ServerRequest;
-use Psr\Http\Message\ServerRequestInterface;
+use Duyler\Builder\Loader\LoaderServiceInterface;
+use Duyler\Builder\Loader\PackageLoaderInterface;
+use Duyler\DI\ContainerInterface;
+use Duyler\EventBus\Build\Context;
+use Duyler\Scenario\State\HandleRunningScenarioStateHandler;
+use Duyler\Scenario\State\RequestToScenarioStateHandler;
+use Duyler\Scenario\State\ResolveCommandStateHandler;
+use Duyler\Scenario\State\ResolveRouteStateHandler;
+use FilesystemIterator;
+use Override;
+use RecursiveDirectoryIterator;
+use RecursiveIteratorIterator;
+use Symfony\Component\Yaml\Yaml;
 
 class Loader implements PackageLoaderInterface
 {
-    public function load(LoaderServiceInterface $loaderService): void
+    public function __construct(
+        private ScenarioConfig $scenarioConfig,
+        private ScenarioResolver $scenarioResolver,
+        private ContainerInterface $container,
+    ) {}
+
+    #[Override]
+    public function beforeLoadBuild(LoaderServiceInterface $loaderService): void
     {
-        $makeRequestAction = new Action(
-            id: 'Request.MakeRequest',
-            handler: MakeRequestAction::class,
-            classMap: [
-                ServerRequestInterface::class => ServerRequest::class
-            ],
-            providers: [
-                Router::class => RouterRequestProvider::class,
-            ],
-            externalAccess: true,
-            contract: ServerRequestInterface::class,
+        /** @var RequestToScenarioStateHandler $requestToScenarioStateHandler */
+        $requestToScenarioStateHandler = $this->container->get(RequestToScenarioStateHandler::class);
+
+        /** @var HandleRunningScenarioStateHandler $handleRunningScenarioStateHandler */
+        $handleRunningScenarioStateHandler = $this->container->get(HandleRunningScenarioStateHandler::class);
+
+        /** @var ResolveRouteStateHandler $resolveRouteStateHandler */
+        $resolveRouteStateHandler = $this->container->get(ResolveRouteStateHandler::class);
+
+        /** @var ResolveCommandStateHandler $resolveCommandStateHandler */
+        $resolveCommandStateHandler = $this->container->get(ResolveCommandStateHandler::class);
+
+        $loaderService->addStateHandler($requestToScenarioStateHandler);
+        $loaderService->addStateHandler($handleRunningScenarioStateHandler);
+        $loaderService->addStateHandler($resolveRouteStateHandler);
+        $loaderService->addStateHandler($resolveCommandStateHandler);
+        $loaderService->addStateContext(
+            new Context([
+                RequestToScenarioStateHandler::class,
+                HandleRunningScenarioStateHandler::class,
+                ResolveRouteStateHandler::class,
+                ResolveCommandStateHandler::class,
+            ]),
+        );
+    }
+
+    #[Override]
+    public function afterLoadBuild(LoaderServiceInterface $loaderService): void
+    {
+        $iterator = new RecursiveIteratorIterator(
+            iterator: new RecursiveDirectoryIterator($this->scenarioConfig->path, FilesystemIterator::SKIP_DOTS),
+            mode: RecursiveIteratorIterator::SELF_FIRST,
+            flags: RecursiveIteratorIterator::CATCH_GET_CHILD,
         );
 
-        $requestToAction = $loaderService->getContainer()->make(RequestToActionStateHandler::class);
-        $receiveScenario = $loaderService->getContainer()->make(ReceiveScenarioStateHandler::class);
-        $resultEmitter = $loaderService->getContainer()->make(ResultEmitterStateHandler::class);
+        foreach ($iterator as $path => $dir) {
+            if ($dir->isFile() && 'yaml' === strtolower($dir->getExtension())) {
+                $scenario = Yaml::parseFile($path, Yaml::PARSE_CONSTANT);
 
-        $loaderService->getBuilder()->addStateHandler($resultEmitter);
-        $loaderService->getBuilder()->addStateHandler($receiveScenario);
-        $loaderService->getBuilder()->addStateHandler($requestToAction);
-        $loaderService->getBuilder()->doAction($makeRequestAction);
+                $this->scenarioResolver->resolve(new Scenario($loaderService, $scenario));
+            }
+        }
     }
 }

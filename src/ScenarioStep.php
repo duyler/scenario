@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Duyler\Scenario;
 
-use DateInterval;
 use Duyler\Scenario\Exception\ActionForScenarioNotExistsException;
 use Duyler\Scenario\Exception\ActionScenarioNotSetException;
 use UnitEnum;

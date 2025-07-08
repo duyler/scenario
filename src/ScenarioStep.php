@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Duyler\Scenario;
 
+use DateInterval;
 use Duyler\Scenario\Exception\ActionForScenarioNotExistsException;
 use Duyler\Scenario\Exception\ActionScenarioNotSetException;
 use UnitEnum;
@@ -14,6 +15,9 @@ readonly class ScenarioStep
     public array $action;
     public null|ScenarioStep $success;
     public null|ScenarioStep $fail;
+    public array $triggerFor;
+    public null|string $scenario;
+    public null|DateInterval $timeout;
 
     public function __construct(
         string|UnitEnum $scenarioId,
